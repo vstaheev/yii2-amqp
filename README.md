@@ -103,6 +103,13 @@ $ php yii rabbit my_routing_key direct --exchange=my_exchange
 
 to listen direct messages on selected exchange.
 
+Run command
+```bash
+$ php yii rabbit --exchange=my_exchange --queue=queue1
+```
+
+to listen messages on selected exchange binding queue1 
+
 Also you can create controllers for your needs. Just use for your web controllers class
 `webtoucher\amqp\controllers\AmqpConsoleController` instead of `yii\web\Controller` and for your console controllers
 class `webtoucher\amqp\controllers\AmqpConsoleController` instead of `yii\console\Controller`. AMQP connection will be
