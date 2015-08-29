@@ -34,7 +34,7 @@ class AmqpListenerController extends AmqpConsoleController
 
     public function actionRun($routingKey = '#', $type = Amqp::TYPE_TOPIC)
     {
-        $this->amqp->listen($this->exchange, $routingKey, [$this, 'callback'], $type);
+        $this->amqp->listen($this->exchange, $routingKey, [$this, 'callback'], $type, $this->queue);
     }
 
     public function callback(AMQPMessage $msg)
@@ -59,7 +59,12 @@ class AmqpListenerController extends AmqpConsoleController
                 'routing_key' => $msg->get('routing_key'),
                 'reply_to' => $msg->has('reply_to') ? $msg->get('reply_to') : null,
             ];
-            $interpreter->$method(Json::decode($msg->body, true), $info);
+            try{
+                $body = Json::decode($msg->body, true);
+            }catch(\Exception $e) {
+                $body = $msg->body;
+            }
+            $interpreter->$method($body, $info);
         } else {
             if (!isset($this->interpreters[$this->exchange])) {
                 $interpreter = new AmqpInterpreter();

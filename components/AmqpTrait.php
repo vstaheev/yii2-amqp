@@ -38,6 +38,13 @@ trait AmqpTrait
     public $exchange = 'exchange';
 
     /**
+     * bind queue.
+     *
+     * @var string
+     */
+    public $queue = '';
+
+    /**
      * Returns AMQP object.
      *
      * @return Amqp
