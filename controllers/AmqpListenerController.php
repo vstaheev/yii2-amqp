@@ -39,33 +39,37 @@ class AmqpListenerController extends AmqpConsoleController
 
     public function callback(AMQPMessage $msg)
     {
-        $routingKey = $msg->delivery_info['routing_key'];
+        $routingKey = $msg->get('routing_key');
         $method = 'read' . Inflector::camelize($routingKey);
 
         if (!isset($this->interpreters[$this->exchange])) {
             $interpreter = $this;
-        } elseif (class_exists($this->interpreters[$this->exchange])) {
+        }
+        elseif (class_exists($this->interpreters[$this->exchange])) {
             $interpreter = new $this->interpreters[$this->exchange];
             if (!$interpreter instanceof AmqpInterpreter) {
                 throw new Exception(sprintf("Class '%s' is not correct interpreter class.", $this->interpreters[$this->exchange]));
             }
-        } else {
+        }
+        else {
             throw new Exception(sprintf("Interpreter class '%s' was not found.", $this->interpreters[$this->exchange]));
         }
 
-        if (method_exists($interpreter, $method)) {
+        if (method_exists($interpreter, $method) || is_callable([$interpreter, $method])) {
             $info = [
-                'exchange' => $msg->get('exchange'),
-                'routing_key' => $msg->get('routing_key'),
-                'reply_to' => $msg->has('reply_to') ? $msg->get('reply_to') : null,
+                'exchange'    => $this->exchange,
+                'routing_key' => $routingKey,
+                'reply_to'    => $msg->has('reply_to') ? $msg->get('reply_to') : null,
             ];
-            try{
+            try {
                 $body = Json::decode($msg->body, true);
-            }catch(\Exception $e) {
+            }
+            catch (\Exception $e) {
                 $body = $msg->body;
             }
             $interpreter->$method($body, $info);
-        } else {
+        }
+        else {
             if (!isset($this->interpreters[$this->exchange])) {
                 $interpreter = new AmqpInterpreter();
             }
