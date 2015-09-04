@@ -42,17 +42,19 @@ class AmqpListenerController extends AmqpConsoleController
         $routingKey = $msg->get('routing_key');
         $method = 'read' . Inflector::camelize($routingKey);
 
-        if (!isset($this->interpreters[$this->exchange])) {
+        $interpreter = isset($this->interpreters[$this->exchange]) ? $this->interpreters[$this->exchange] : (isset($this->interpreters['*']) ? $this->interpreters['*'] : null);
+
+        if ($interpreter === null) {
             $interpreter = $this;
         }
-        elseif (class_exists($this->interpreters[$this->exchange])) {
-            $interpreter = new $this->interpreters[$this->exchange];
+        else if (class_exists($interpreter)) {
+            $interpreter = new $interpreter;
             if (!$interpreter instanceof AmqpInterpreter) {
-                throw new Exception(sprintf("Class '%s' is not correct interpreter class.", $this->interpreters[$this->exchange]));
+                throw new Exception(sprintf("Class '%s' is not correct interpreter class.", $interpreter));
             }
         }
         else {
-            throw new Exception(sprintf("Interpreter class '%s' was not found.", $this->interpreters[$this->exchange]));
+            throw new Exception(sprintf("Interpreter class '%s' was not found.", $interpreter));
         }
 
         if (method_exists($interpreter, $method) || is_callable([$interpreter, $method])) {
@@ -70,7 +72,7 @@ class AmqpListenerController extends AmqpConsoleController
             $interpreter->$method($body, $info);
         }
         else {
-            if (!isset($this->interpreters[$this->exchange])) {
+            if (!$interpreter instanceof AmqpInterpreter) {
                 $interpreter = new AmqpInterpreter();
             }
             $interpreter->log(
