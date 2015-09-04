@@ -67,6 +67,11 @@ class Amqp extends Component
     public $vhost = '/';
 
     /**
+     * @var boolean
+     */
+    public $consumeNoAck = true;
+
+    /**
      * @inheritdoc
      */
     public function init()
@@ -179,7 +184,7 @@ class Amqp extends Component
             }
         }
         $this->channel->queue_bind($queueName, $exchange, $routing_key);
-        $this->channel->basic_consume($queueName, '', false, true, false, false, $callback);
+        $this->channel->basic_consume($queueName, '', false, $this->consumeNoAck, false, false, $callback);
 
         while (count($this->channel->callbacks)) {
             $this->channel->wait();
