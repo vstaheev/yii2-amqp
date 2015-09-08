@@ -203,7 +203,7 @@ class Amqp extends Component
     public function listenQueue($queueName, $callback)
     {
         while (true) {
-            if (($message = $this->channel->basic_get($queueName, $this->consumeNoAck)) !== false) {
+            if (($message = $this->channel->basic_get($queueName, $this->consumeNoAck)) instanceof AMQPMessage) {
                 call_user_func($callback, $message);
             }
         }
