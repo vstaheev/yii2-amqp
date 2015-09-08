@@ -195,6 +195,24 @@ class Amqp extends Component
     }
 
     /**
+     * Listens the queue for messages.
+     *
+     * @param string $queueName
+     * @param callable $callback
+     */
+    public function listenQueue($queueName, $callback)
+    {
+        while (true) {
+            if (($message = $this->channel->basic_get($queueName, $this->consumeNoAck)) !== false) {
+                call_user_func($callback, $message);
+            }
+        }
+
+        $this->channel->close();
+        $this->connection->close();
+    }
+
+    /**
      * Returns prepaired AMQP message.
      *
      * @param string|array|object $message
