@@ -45,6 +45,13 @@ trait AmqpTrait
     public $queue = '';
 
     /**
+     * break listen
+     *
+     * @var boolean
+     */
+    public $break = false;
+
+    /**
      * Returns AMQP object.
      *
      * @return Amqp

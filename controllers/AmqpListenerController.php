@@ -34,7 +34,7 @@ class AmqpListenerController extends AmqpConsoleController
 
     public function actionRun()
     {
-        $this->amqp->listenQueue($this->queue, [$this, 'callback']);
+        $this->amqp->listenQueue($this->queue, [$this, 'callback'], $this->break);
     }
 
     public function callback(AMQPMessage $msg)
