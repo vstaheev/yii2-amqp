@@ -125,9 +125,14 @@ class Amqp extends Component
      * @param string $type Use self::TYPE_DIRECT if it is an answer
      * @return void
      */
-    public function send($exchange, $routing_key, $message, $type = self::TYPE_TOPIC)
+    public function send($exchange, $routing_key, $message, $headers = null, $type = self::TYPE_TOPIC)
     {
-        $message = $this->prepareMessage($message);
+        $properties = [];
+        if ($headers !== null) {
+            $properties['application_headers'] = $headers;
+        }
+// echo '<pre>'; print_r($properties); echo '</pre>'; die();
+        $message = $this->prepareMessage($message, $properties);
         if ($type == self::TYPE_TOPIC) {
             $this->channel->exchange_declare($exchange, $type, false, true, false);
         }
