@@ -59,9 +59,10 @@ class AmqpListenerController extends AmqpConsoleController
 
         if (method_exists($interpreter, $method) || is_callable([$interpreter, $method])) {
             $info = [
-                'exchange'    => $this->exchange,
-                'routing_key' => $routingKey,
-                'reply_to'    => $msg->has('reply_to') ? $msg->get('reply_to') : null,
+                'exchange'     => $this->exchange,
+                'routing_key'  => $routingKey,
+                'reply_to'     => $msg->has('reply_to') ? $msg->get('reply_to') : null,
+                'delivery_tag' => $msg->get('delivery_tag'),
             ];
             try {
                 $body = Json::decode($msg->body, true);
@@ -69,7 +70,7 @@ class AmqpListenerController extends AmqpConsoleController
             catch (\Exception $e) {
                 $body = $msg->body;
             }
-            $interpreter->$method($body, $info);
+            $interpreter->$method($body, $info, $this->amqp->channel);
         }
         else {
             if (!$interpreter instanceof AmqpInterpreter) {
